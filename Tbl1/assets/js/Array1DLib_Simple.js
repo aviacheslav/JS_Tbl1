@@ -84,16 +84,16 @@ class TValsShowHide{
 		}
 		return data;
 	}
-	function procArr1D_del1(dataExt, N=0, L=1){
-		let Q=dataExt.length;
-		let data=procArr1D_getSubArr(dataExt);
-		if(N==0){
-			N=Q;
-		}
-		if(Array.isArray(data) && Q>0 && N>=1 && N<=Q){
-			delete[]
-		}
-	}
+	//function procArr1D_del1(dataExt, N=0, L=1){
+	//	let Q=dataExt.length;
+	//	let data=procArr1D_getSubArr(dataExt);
+	//	if(N==0){
+	//		N=Q;
+	//	}
+	//	if(Array.isArray(data) && Q>0 && N>=1 && N<=Q){
+	//		delete[]
+	//	}
+	//}
 	function procArr1D_del(data, N=0, L=1){
 		let Q=data.length;
 		if(Array.isArray(data) && Q>0){
@@ -668,8 +668,31 @@ function writeAllowedValsToMaskedArray(longArray, shortArray, mask, vsh){
 	if(vsh==1) console.log('writeAllowedValsToMaskedArray finishes working');
 	return R;
 }
-// procArr1D_Sort
-//--------------------------------------------------------------------------------------------
+function procArr1D_Sort(arr1D, cbf_vcur_vnext_index_arr=null){
+	const L=arr1D.length, buf;
+	if(cbf_vcur_vnext_index_arr!=null){
+		for(let i=1; i<=L-1; i++){
+			for(let j=i; j<=L; j++){
+				if(cbf_vcur_vnext_index_arr(arr1D[i-1], arr1D[j-1])){
+					buf=arr1D[i-1];
+					arr1D[i-1]=arr2D[j-1];
+					arr1D[j-1]=buf;
+				}
+			}
+		}
+	}else{
+		for(let i=1; i<=L-1; i++){
+			for(let j=i; j<=L; j++){
+				if(arr1D[j-1]<arr1D[i-1]){
+					buf=arr1D[i-1];
+					arr1D[i-1]=arr1D[j-1];
+					arr1D[j-1]=buf;
+				}
+			}
+		}
+	}
+}
+//=============================================================================================================
 function procArr2D_SetFrom1DArray(arr1D, RowIneNotExt=false){
 	let arr2D=[], curRow=[], L;
 	if(Array.isArray(arr1D)){
@@ -693,42 +716,510 @@ function procArr2D_SetFrom1DArray(arr1D, RowIneNotExt=false){
 	}
 	return arr2D;
 }
-// procArr2D_getQExtRows
-// procArr2D_getLength
-// procArr2D_getLengthin
-// procArr2D_getLengthMax
+function procArr2D_getQExtRows(arr2D){
+	return arr2D.length;
+}
+function procArr2D_getLength(arr2D, rowN){
+	const Q=arr2D.length, LN=0;
+	if(rowN>=1 && rowN<=Q){
+		LN=arr2D[rowN-1].length;
+	}
+	return LN;
+}
+function procArr2D_getLengthesAll(arr2D){
+	const Q=arr2D.length, LA=[];
+	for(let i=1; i<=L; i++){
+		LA.push(arr2D[i-1].length);
+	}
+	return LA;
+}
+function procArr2D_getLengthMin(arr2D){
+	const Q=arr2D.length, Lmin=0, Lmax=0, Lcur;
+	for(let i=1; i<=L; i++){
+		if((i==1)|| (i>1 && Lcur<Lmin)){
+			Lmin=Lcur;
+		}
+		if((i==1)|| (i>1 && Lcur>Lmax)){
+			Lmax=Lcur;
+		}
+	}
+	return Lmin;
+}
+function procArr2D_getLengthMax(arr2D){
+	const Q=arr2D.length, Lmin=0, Lmax=0, Lcur;
+	for(let i=1; i<=L; i++){
+		Lcur=arr2D[i-1].length;
+		if((i==1)|| (i>1 && Lcur<Lmin)){
+			Lmin=Lcur;
+		}
+		if((i==1)|| (i>1 && Lcur>Lmax)){
+			Lmax=Lcur;
+		}
+	}
+	return Lmax;
+}
 //
-// procArr2D_setSize
-// procArr2D_setLengthN
-// procArr2D_makeRect
+function procArr2D_setSize(arr2D, QExtRows, IneRowsSize=1, dfltVal=0){
+	const QExtRowsWas=procArr2D_getQExtRows(arr2D),
+	      IneRowsSizeWas=procArr2D_getLengthesAll(arr2D),
+		  LminWas=procArr2D_getLengthMin(arr2D),
+		  LmaxWas=procArr2D_getLengthMax(arr2D),
+		  Lmin, Lmax, Lcur, LcurWas,
+		  QExtRowsMin, IneRowLengthMin, IneRowLengthMax,
+		  curRow;
+	QExtRowsMin = QExtRowsWas <= QExtRows ? QExtRowsWas : QExtRows;
+	if(Array.isArray(IneRowsSize){
+		for(let i=1; i<=IneRowsSize.length; i++){
+			if(i==1 || (i>1 && IneRowsSize[i-1]<Lmin))
+			{
+				Lmin=IneRowsSize[i-1];
+			}
+			if(i==1 || (i>1 && IneRowsSize[i-1]>Lmax))
+			{
+				Lmax=IneRowsSize[i-1];
+			}
+		if(IneRowsSize.length<QExtRows){
+			for(let i=IneRowsSize.length+1; i<=QExtRows; i++){
+				IneRowsSize.push(Lmin);
+			}
+		}
+		//
+		if(QExtRows>QExtRowsWas){
+			for(let i=1; i<=QExtRowsWas; i++){
+				LcurWas=arr2D[i-1].length;
+				Lcur=IneRowsSize[i-1];
+				IneRowLengthMin = LcurWas <= Lcur ? LcurWas : Lcur;
+				IneRowLengthMax = LcurWas >= Lcur ? LcurWas : Lcur;
+				if(Lcur<LcurWas){
+					for(let j=LcurWas; j>=Lcur; j--){
+						arr2D[i-1].pop();
+					}
+				}else if(Lcur>LcurWas){
+					for(let j=LcurWas; j<=Lcur; j++){
+						arr2D[i-1].push(dfltVal);
+					}
+				}
+			}
+			for(let i=QExtRowsWas+1; i<=QExtRows; i++){
+				curRow=[];
+				for(let j=1; j<=IneRowsSize[i-1]; j++){
+					curRow.push(dfltVal);
+				}
+				arr2D.push(curRow);
+			}
+		}else{
+			if(QExtRows<QExtRowsWas){
+				for(let i=QExtRowsWas; i>=QExtRows; i--){
+					ar2D.pop();
+				}
+			}
+			for(let i=1; i<=QExtRows; i++){
+				LcurWas=arr2D[i-1].length;
+				Lcur=IneRowsSize[i-1];
+				if(Lcur<LcurWas){
+					for(let j=LcurWas; j>=Lcur; j--){
+						arr2D[i-1].pop();
+					}
+				}else if(Lcur>LcurWas){
+					for(let j=LcurWas; j<=Lcur; j++){
+						arr2D[i-1].push(dfltVal);
+					}
+				}
+			}
+		}
+	}else{
+		if(QExtRows>QExtRowsWas){
+			for(let i=1; i<=QExtRowsWas; i++){
+				LcurWas=arr2D[i-1].length;
+				Lcur=IneRowsSize;
+				if(Lcur<LcurWas){
+					for(let j=LcurWas; j>=Lcur; j--){
+						arr2D[i-1].pop();
+					}
+				}else if(Lcur>LcurWas){
+					for(let j=LcurWas; j<=Lcur; j++){
+						arr2D[i-1].push(dfltVal);
+					}
+				}
+			}
+			for(let i=QExtRowsWas+1; i<=QExtRows; i++){
+				curRow=[];
+				for(let j=1; j<=IneRowsSize; j++){
+					curRow.push(dfltVal);
+				}
+				arr2D.push(curRow);
+			}
+		}else{
+			if(QExtRows<QExtRowsWas){
+				for(let i=QExtRowsWas; i>=QExtRows; i--){
+					ar2D.pop();
+				}
+			}
+			for(let i=1; i<=QExtRows; i++){
+				LcurWas=arr2D[i-1].length;
+				Lcur=IneRowsSize;
+				if(Lcur<LcurWas){
+					for(let j=LcurWas; j>=Lcur; j--){
+						arr2D[i-1].pop();
+					}
+				}else if(Lcur>LcurWas){
+					for(let j=LcurWas; j<=Lcur; j++){
+						arr2D[i-1].push(dfltVal);
+					}
+				}
+			}
+		}
+	}
+}//fn
+function procArr2D_setLengthN(N, L, dfltVal=0){
+	let Lwas;
+	if(N>=1 && N<=arr2D.length){
+		Lwas=arr2S[N-1].length;
+		if(Lwas<L){
+			for(let i=Lwas+1; i<=L; i++){
+				arr2D[N-1].push(dfltVal);
+			}
+		}else if(Lwas<L){
+			for(let i=L; i>=Lwas; i--){
+				arr2D[N-1].pop();
+			}
+		}
+	}
+}
+function procArr2D_makeRect(arr2D, L_max0MinMinus1){
+	if(L_max0MinMinus1==-1){
+		L_max0MinMinus1=procArr2D_getLengthMin(arr2D);
+	}else if(L_max0MinMinus1==0){
+		L_max0MinMinus1=procArr2D_getLengthMax(arr2D);
+	}else if(L_max0MinMinus1>0 && L_max0MinMinus1<=36550){
+		procArr2D_setSize(arr2D, procArr2D_getQExtRows(arr2D), L_max0MinMinus1);
+	}
+}
 //
-// procArr2D_swapElements
-// procArr2D_getrElementAsLink
-// procArr2D_getElementAsCopy
+function procArr2D_swapElements(Element1extRowN, Element1ineRowN, Element2extRowN, Element2ineRowN){
+	let Q=arr2D.length, L1, L2, N1, N2, buf;
+	if(Element1extRowN>=1 && Element1extRowN<=Q && Element2extRowN>=1 && Element2extRowN<=Q){
+		L1=arr2D[Element1extRowN-1].length;
+		L2=arr2D[Element2extRowN-1].length;
+		if(Element1ineRowN<0){
+			N1=L1+Element1ineRowN;
+		}
+		if(Element2ineRowN<0){
+			N2=L2+Element2ineRowN;
+		}
+		if(N1>=1 && N1<=L1   && N2>=1 && N2<=L2){
+			buf=arr2D[Element1extRowN-1][N1-1];
+			arr2D[Element1extRowN-1][N1-1]=arr2D[Element2extRowN-1][N2-1];
+			arr2D[Element2extRowN-1][N2-1]=buf;
+		}
+	}
+}
+function procArr2D_getElementAsLink(arr2D, extRowN, ineRowN){
+	let R, L;
+	if(extRowN>=1 && extRowN<=arr2D.length){
+		L=arr2D[extRowN-1].length;
+		if(ineRowN<0){
+			ineRowN=L+ineRowN;
+		}
+		if(ineRowN>=1 && ineRowN<=L){
+			R=arr2D[extRowN-1][ineRowN-1];
+		}
+	}
+	return R;
+}
+// procArr2D_getElementAsCopy(arr2D, extRowN, ineRowN)
+
 //
-// procArr2D_getExtRowAsLink
+function procArr2D_getExtRowAsLink(arr2D, extRowN){
+	let R=[], Q=arr2D.length;
+	if(extRowN<0){
+		extRowN=Q+extRowN;
+	}
+	if(extRowN>=1 && extRowN<=Q){
+		R=arr2D[extRowN-1];
+	}
+	return R;
+}
 // procArr2D_getExtRowAsCopy
 //
-// procArr2D_setExtRow
+function procArr2D_setExtRow(arr2D, extRowN, data, dfltVal=0, lengthChangeAllowed=true){
+	let row=[], Q=arr2D.length, LOld, LExt=row.length, LMin, LNew;
+	if(extRowN<0){
+		extRowN=Q+extRowN;
+	}
+	if(extRowN>=1 && extRowN<=Q){
+		LOld=arr2D[extRowN-1].length;
+		if(Array.isArray(data)){
+			row=data;
+			LExt=row.length;
+			if(LExt==LOld || lengthChangeAllowed){
+				LNew=LExt;
+			}else{
+				LNew=LOld;
+			}
+			LMin= LOld<= LExt ? LOld : LExt;
+			for(let i=1; i<=LMin; i++){
+				arr2D[i-1]=row[i-1];
+			}
+			if(LOld<LNew){
+				for(let i=LMin+1; i<=LNew; i++){
+					arr2D[i-1].push(row[i-1]);
+				}
+			}else if(LExt<LNew){
+				for(let i=LMin+1; i<=LNew; i++){
+					arr2D[i-1].push(dfltVal);
+				}
+			}
+		}else{
+			if(LOld>0){
+				for(let i=1; i<=LOld; i++){
+					row.push(data);
+				}
+			}else{
+				row.push(data);
+			}
+			arr2D[extRowN-1]=row;
+		}
+	}
+}//fn
 //
 // procArr2D_getIneRowAsLink//if possible
-// procArr2D_getIneRowAsCopy
+function procArr2D_getIneRowAsCopy(arr2D, ineRowN){
+	let R=[], Lmin=procArr2D_getLengthMin(arr2D), Lmax=procArr2D_getLengthMax(arr2D), Q=arr2.length;
+	if(ineRowN>=1 && ineRowN<=Lmin){
+		for(let i=1; i<=Q; i++){
+			R.push(arr2D[i-1][ineRowN-1]);
+		}
+	}
+	return R;
+}
 //
-// procArr2D_setIneRow
+function procArr2D_setIneRow(arr2D, ineRowN, data, dfltVal=0){
+	let row=[], Lmin=procArr2D_getLengthMin(arr2D), Lmax=procArr2D_getLengthMax(arr2D), Q=arr2.length, LExt;
+	if(!Array.isArray(data){
+		for(let i=1; i<=Q; i++){
+			arr2D[i-1][ineRowN-1]=data;
+		}
+	}else{
+		LExt=data.length;
+		if(LExt<Q){
+			for(let i=1; i<=LExt; i++){
+				arr2D[i-1][ineRowN-1]=data[i-1];
+			}
+			for(let i=LExt+1; i<=Q; i++){
+				arr2D[i-1][ineRowN-1]=dfltVal;
+			}
+		}else{
+			for(let i=1; i<=Q; i++){
+				arr2D[i-1][ineRowN-1]=data[i-1];
+			}
+		}
+	}
+}//fn
 //
-// procArr2D_addExtRow
-// procArr2D_insExtRow
-// procArr2D_delExtRow
+function procArr2D_addExtRow(arr2D, data, dfltVal=0, notSameLengthAllowed=true){
+	let row=[], Q, Lmin=procArr2D_getLengthMin(arr2D), Lmax=procArr2D_getLengthMax(arr2D), LExt;
+	if(Array.isArray(data)){
+		row=data;
+	else{
+		row.push(data);
+	}
+	LExt=row.length;
+	if(arr2D!=[]){
+		Q=arr2D.length;
+		if(Lmin==Lmax && !notSameLengthAllowed){
+			if(LExt<Lmin){
+				for(let i=LExt+1; i<=Lmin; i++){
+					row.push(dfltVal);
+				}
+			}else if(LExt>Lmax){
+				for(let i=LExt; i>=Lmax; i--){
+					row.pop();
+				}
+			}
+		}
+	}
+	arr2D.push(row);
+}
+function procArr2D_insExtRow(arr2D, data, extRowN, dfltVal=0, notSameLengthAllowed=true){
+	let row=[], Q, Lmin=procArr2D_getLengthMin(arr2D), Lmax=procArr2D_getLengthMax(arr2D), LExt;
+	if(Array.isArray(data)){
+		row=data;
+	else{
+		row.push(data);
+	}
+	LExt=row.length;
+	//
+	if(arr2D!=[]){
+		Q=arr2.length;
+		if(extRowN<0){
+			extRowN+=Q;
+		}
+		if(extRowN>=1 && extRowN<=Q){
+			if(Lmin==Lmax && !notSameLengthAllowed){
+				if(LExt<Lmin){
+					for(let i=LExt+1; i<=Lmin; i++){
+						row.push(dfltVal);
+					}
+				}else if(LExt>Lmax){
+					for(let i=LExt; i>=Lmax; i--){
+						row.pop();
+					}
+				}
+			}
+			procArr1D_ins2(arr2D, row, extRowN);
+		}
+	}
+}
+function procArr2D_delExtRow(arr2D, extRowN){
+	let Q=arr2D.length;
+	if(arr2D!=[]){
+		if(extRowN<0){
+			extRowN+=Q;
+		}
+		if(extRowN>=1 && extRowN<=Q){
+			procArr1D_del(arr2D, extRowN);
+		}
+	}
+}
 //
-// procArr2D_addIneRow
-// procArr2D_insIneRow
-// procArr2D_delIneRow
+function procArr2D_addIneRow(arr2D, data, ineRowN, dfltVal=0, ifShort_Stretch_NotMakeTorn=true, ifTorn_Ignore0StretchToMax1AddToEachExtRow2=0){
+	let row=[], Q, Lmin=procArr2D_getLengthMin(arr2D), Lmax=procArr2D_getLengthMax(arr2D), LExt, LToAdd;
+	const  L_max0MinMinus1=0;
+	if(arr2D==[]){
+		if(Array.isArray(data)){
+			LExt=data.length;
+			for(let i=1; i<=LExt; i++){
+				row=[]];
+				row.push(data[i-1]);
+				arr2D.push(row);
+			}
+		}else{
+			row.push(data);
+			arr2D.push(row);
+		}
+	}else{
+		if(Array.isArray(data){
+			row=data;
+		}else{
+			row.push(data);
+		}
+		LExt=row.length;
+		Q=arr2D.length;
+		if(!(Lmin!=Lmax && ifTorn_Ignore0StretchToMax1AddToEachExtRow2!=0)){
+			if(Lmin!=Lmax && ifTorn_Ignore0StretchToMax1AddToEachExtRow2==1){
+				procArr2D_makeRect(arr2D, L_max0MinMinus1);
+			}
+			if(LExt<Q){
+				if(ifShort_Stretch_NotMakeTorn){
+					for(let i=LExt+1; i<=Q; i++){
+						row.push(dfltVal);
+					}
+					LToAdd=row.length;//Q
+				}else{
+					LToAdd=LExt;
+				}
+			}else if(LExt>Q){
+				for(let i=LExt; i>=Q; i--){
+					row.pop();
+				}
+				LToAdd=row.length;//Q
+			}
+			for(let i=1; i<=LToAdd; i++){
+				procArr1D_add(arr2D[i-1], row[i-1]);
+			}
+		}//if to do 			
+	}//case empty or with existing data
+}//fn
+function procArr2D_insIneRow(arr2D, ineRowN, data, dfltVal=0){
+	let row=[], Q, Lmin=procArr2D_getLengthMin(arr2D), Lmax=procArr2D_getLengthMax(arr2D), QExt;
+	if(arr2D!=[] && ineRowN>=1 && ineRowN<=Lmin){
+		Q=arr2D.length;
+		if(Array.isArray(data)){
+			QExt=data.length;
+			if(QExt<Q){
+				for(let i=1; i<=QExt; i++){
+					row.push(data[i-1]);
+				}
+				for(let i=QExt+1; i<=Q; i++){
+					row.push(dfltVal);
+				}
+			}else{
+				for(let i=1; i<=Q ++){
+					row.push(data);
+				}
+			}
+		}else{
+			for(let i=1; i<=Q ++){
+				row.push(data);
+			}
+		}
+		for(let i=1; i<=Q; i++){
+			procArr1D_ins2(arr2D[i-1], row[i-1], ineRowN);
+		}
+	}//if to work
+}//fn
+function procArr2D_delIneRow(arr2D, ineRowN){
+	let row=[], Q, Lmin=procArr2D_getLengthMin(arr2D), Lmax=procArr2D_getLengthMax(arr2D);
+	const QDeleted=1;
+	if(arr2D!=[] && ineRowN>=1 && ineRowN<=Lmin){
+		for(let i=1; i<=Q; i++){
+			procArr1D_del(data, ineRowN, QDeleted);
+		}
+	}
+}
 //
-// procArr2D_addToExtRow
-// procArr2D_insToExtRow
-// procArr2D_delFromExtRow
+function procArr2D_addToExtRow(arr2D, extRowN, data){
+	if(arr2D!=[] && ( (extRowN>=1 && extRowN<=arr2D.length)||(extRowN<0 && -extRowN<=arr2D.length ) ) ){
+		if(extRowN<0){
+			extRowN+=Q;
+		}
+		procArr1D_add(arr2D[extRowN-1], data);
+	}
+}	
+function procArr2D_insToExtRow(arr2D, extRowN, posN, data){
+	if(arr2D!=[] && ( (extRowN>=1 && extRowN<=arr2D.length)||(extRowN<0 && -extRowN<=arr2D.length ) ) ){
+		if(extRowN<0){
+			extRowN+=Q;
+		}
+		if((posN>=1 && posN<=arr2D[extRowN-1].length)||(posN<0 && -posN<=arr2D[extRowN-1].length)){
+			if(posN<0){
+				extRowN+=arr2D[extRowN-1].length;
+			}
+			//procArr1D_ins2(data, val, N)
+			procArr1D_ins2(arr2D[extRowN-1], data, posN);
+		}
+	}//if to do
+}//fn
+function procArr2D_delFromExtRow(arr2D, extRowN, posN){
+	const QToDel=1;
+	if(arr2D!=[] && ( (extRowN>=1 && extRowN<=arr2D.length)||(extRowN<0 && -extRowN<=arr2D.length ) ) ){
+		if(extRowN<0){
+			extRowN+=Q;
+		}
+		if((posN>=1 && posN<=arr2D[extRowN-1].length)||(posN<0 && -posN<=arr2D[extRowN-1].length)){
+			if(posN<0){
+				extRowN+=arr2D[extRowN-1].length;
+			}
+			//procArr1D_del(data, N=0, L=1)
+			procArr1D_del(arr2D[extRowN-1], posN, QToDel);
+		}
+	}//if to do
+}//fn
 //
-// procArr2D_swapExtRows
+function procArr2D_swapExtRows(arr2D, extRow1N, extRow2N){
+	let Q=arr2D.length;
+	if(extRow1N<0){
+		extRow1N+=Q;
+	}
+	if(extRow2N<0){
+		extRow2N+=Q;
+	}
+	//
+	if(extRow1N>=1 && extRow1N<=Q  extRow2N>=1 && extRow2N<=Q && extRow1N!=extRow2N){
+		procArr1D_swap(arr2D, extRow1N, extRow2N); 
+	}	
+}//fn
 // procArr2D_reverseExtRows
 //
 // procArr2D_swapIneRows
