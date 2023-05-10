@@ -7,6 +7,53 @@ class TValsShowHide{
 }
 
 
+/*class Arr2DSize{
+	constructor(){
+		this.QExtRows=0;
+		this.IneRowsLengthes=null;
+		this.QIneRows=0;
+	}
+	static transformExtRowN(extRowNIni, QExtRows){
+		if(extRowNIni<QExtRows){
+			extRowN=extRowNIni+QExtRows;
+		}else{
+			extRowN=extRowNIni;
+		}
+		return extRowN;
+	}
+	setNull(){
+		this.QExtRows=0;
+		this.IneRowsLengthes=null;
+		this.QIneRows=0;
+	}
+	setOne(isRect=true){
+		this.QExtRows=0;
+		if(isRect){
+			this.IneRowsLengthes=null;
+		}
+		this.QIneRows=1;
+	}
+	getQExtRows(){
+		return this.QExtRows;
+	}
+	getQIneRows(){
+		return this.QIneRows;
+	}
+	getLength(extRowNExt){
+		let L=0, extRowN=Arr2DSize.transformExtRowN(extRowNExt, this.QExtRows);
+		if(extRowN>=1 && extRowN<this.QExtRows){
+			if(this.IneRowsLengthes!=null){
+				L=this.IneRowsLengthes[extRowN-1];
+			}
+		}
+	}
+	getLengthMin(){
+		let minL, maxL, curL;
+		
+	
+	}
+}*/
+
 
 //
 	function procArr1D_setLength(data, L, dflt=0){
@@ -1220,18 +1267,154 @@ function procArr2D_swapExtRows(arr2D, extRow1N, extRow2N){
 		procArr1D_swap(arr2D, extRow1N, extRow2N); 
 	}	
 }//fn
-// procArr2D_reverseExtRows
+function procArr2D_reverseExtRows(arr2D, vsh=0){
+	procArr1D_reverse(arr2D, vsh);
+}
 //
-// procArr2D_swapIneRows
-// procArr2D_reverseIneRows
+function procArr2D_swapIneRows(arr2D, ineRow1N, ineRow2N){
+	let QExtRows=procArr2D_GetQExtRows(arr2D);
+	if(ineRow1N>=1 && ineRow1N<=procArr2D_getLengthMin(arr2D) && ineRow2N>=1 && ineRow2N<=procArr2D_getLengthMin(arr2D) && ineRow1N!=ineRow2N){
+		for(let i=1; i<=QExtRows; i++){
+			procArr1D_swap(arr2D, ineRow1N, ineRow2N);
+		}
+	}
+}
+function procArr2D_reverseIneRows(arr2D){
+	let minL=procArr2D_getLengthMin(arr2D), maxL=procArr2D_getLengthMax(arr2D), Q=Arr2D_GetQExtRows(arr2D);
+	if(minL==maxL){
+		for(let i=1;i<=Q; i++){
+			procArr1D_reverse(arr2D[i-1]);
+		}
+	}
+}
 //
-// procArr2D_seekElement
-// procArr2D_SubArr1DExtIsAtPos
-// procArr2D_SubArr1DIneIsAtPos
-// procArr2D_SubArr2DIsAtPos
-// procArr2D_SeekSubArr1DExt
-// procArr2D_SeekSubArr1DIne
-// procArr2D_SeekSubArr2D
+function procArr2D_seekElement(arr2D, val){
+	let poss=[], poss1, poss2;
+	let Q=arr2D_GetQExtRows(arr2D), QFoundAtSnglLine;
+	for(let i=1; i<=Q; i++){
+		poss1=procArr1D_findVal(arr2D[i-1], val, 1, 0);
+		QFoundAtSnglLine=poss1.length;
+		if(QFoundAtSnglLine>0){
+			poss2=[];
+			for(let j=1; j<=QFoundAtSnglLine; j++){
+				poss2=[];
+				poss2.push(i);
+				poss2.push(poss1[j-1]);
+				poss.push(poss2);
+			}
+		}
+	}
+	return poss;
+}
+function procArr2D_ValIsAtPos(arr2D, val, LineN, ColN){
+	return (LineN>=1 && LineN<=arr2D.length && ColN>=1 && ColN<=arr2D[LineN-1].length && arr2D[LineN-1][ColN-1]===val);
+}
+function procArr2D_SubArr1DExtIsAtPos(arr2D, subArr1D, LineN, ColN){
+	let verdict=false;
+	let Q=procArr2D_GetQExtRows(arr2D);
+	if(LineN>=1 && LineN<=Q){
+		if(ColN>=1 && ColN<=procArr2D_GetLength(LineN)){
+			verdict=procArr1D_subArrIsAtPos(arr2D[LineN-1], subArr1D, ColN);
+		}
+	}
+	return verdict;
+}
+function procArr2D_SubArr1DIneIsAtPos(arr2D, subArr1D, LineN, ColN){
+	let verdict=true;
+	let Q=procArr2D_GetQExtRows(arr2D);
+	let whatL=subArr1D.length;
+	if(LineN>=1 && LineN<=Q){
+		if(ColN>=1 && ColN<=procArr2D_GetLength(LineN)){
+			for(let i=1; i<=whatL; i++){
+				if(procArr1D_ValIsAtPos(arr2D[LineN+i-1-1], subArr1D[i-1])==false, ColN){
+					verdict=false;
+				}
+			}
+		}
+	}
+	return verdict;
+}
+function procArr2D_SubArr2DIsAtPos(arr2D, subArr2D, LineN, ColN){
+	let verdict=true;
+	let Q=procArr2D_GetQExtRows(arr2D);
+	let whatL=subArr1D.length;
+	if(LineN>=1 && LineN<=Q){
+		if(ColN>=1 && ColN<=procArr2D_GetLength(LineN)){
+			for(let i=1; i<=whatL; i++){
+				if(procArr1D_subArrIsAtPos(arr2D[LineN+i-1-1], subArr1D[i-1], ColN)==false){
+					verdict=false;
+				}
+			}
+		}
+	}
+	return verdict;
+}
+function procArr2D_SeekVal(arr2D, val){
+	let curL, Q=procArr2D_GetQExtRows(), poss=[], pos=[];
+	for(let i=1; i<Q; i++){
+		curL=arr2D[i-1].length;
+		for(let j=1; j<=curL; j++){
+			if(procArr2D_ValIsAtPos(arr2D, val, i, j)){
+				pos=[];
+				pos.push(i);
+				pos.push(j);
+				poss.push(pos);
+			}
+		}
+	}
+	return poss;
+}
+function procArr2D_SeekSubArr1DExt(arr2D, subArr1DExt){
+	let curL, Q=procArr2D_GetQExtRows(), poss=[], pos=[];
+	for(let i=1; i<Q; i++){
+		curL=arr2D[i-1].length;
+		for(let j=1; j<=curL; j++){
+			if(procArr2D_SubArr1DExtIsAtPos(arr2D, subArr1DExt, i, j)){
+				pos=[];
+				pos.push(i);
+				pos.push(j);
+				poss.push(pos);
+			}
+		}
+	}
+	return poss;
+}
+function procArr2D_SeekSubArr1DIne(arr2D, subArr1DIne){
+	let curL, Q=procArr2D_GetQExtRows(), poss=[], pos=[], QWhat=subArr1DIne.length, LastLineToSeek=Q-QWhat+1;
+	for(let i=1; i<LastLineToSeek; i++){
+		curL=arr2D[i-1].length;
+		for(let j=1; j<=curL; j++){
+			if(procArr2D_SubArr1DIneIsAtPos(arr2D, subArr1DIne, i, j)){
+				pos=[];
+				pos.push(i);
+				pos.push(j);
+				poss.push(pos);
+			}
+		}
+	}
+	return poss;
+}
+function procArr2D_SeekSubArr2D(arr2D, subArr2D){
+	let curL, Q=procArr2D_GetQExtRows(), poss=[], pos=[], QWhat=subArr2D.length, LastLineToSeek=Q-QWhat+1, verdict;
+	for(let i=1; i<LastLineToSeek; i++){
+		curL=arr2D[i-1].length;
+		for(let j=1; j<=curL; j++){
+			verdict=true;
+			for(let k=1; k<=QWhat; k++){
+				if(procArr2D_SubArr1DExtIsAtPos(arr2D[i-1], subArr2D[k-1], i, j)==false){
+					verdict==false;
+				}
+			}
+			if(verdict==true){
+				pos=[];
+				pos.push(i);
+				pos.push(j);
+				poss.push(pos);
+			}
+		}
+	}
+	return poss;
+}
 //
 // procArr2D_GetSubArray
 //
